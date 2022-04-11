@@ -2,22 +2,24 @@ from requests import get
 from bs4 import BeautifulSoup
 import csv
 import urllib.request as ur
+import os
 
+#this python file returns the list of images downloaded in a folder and the list of the image names.
 
 list_Images =[]
 list_Name_Images =[]
-#list of forbidden characters
 list_Chars_Forb = [">", "<", ":", "/", "\'", "?", "*", "!","#","'", '"']
 url = "http://books.toscrape.com/"
 str_index = "index.html"
 str_catalogue = "catalogue/"
 url_2 = url + str_index
 page = get(url_2)
-# use of BeautifulSoup to parse the Html home page
+# use of BeautifulSoup to parse the Html home web page
+
 soup = BeautifulSoup(page.content, 'html.parser')
 nb_list = int(soup.find_all("strong")[0].string)
 
-# get the list of all Images names
+#get the list of all images names
 
 for link in soup.find_all('div', class_="image_container"):
     url_3 =[]
@@ -27,7 +29,6 @@ for link in soup.find_all('div', class_="image_container"):
     list_Images.append(url_3)
     list_Name_Images.append(link_2.find_all('img')[0].get('alt'))
 
-# get the list of all Images URL
 for p in range(int(nb_list / 20) - 1):
     link_page = soup.find_all('li', class_='next')[0]
     link_page_2 = link_page.find_all('a')[0]
@@ -47,16 +48,19 @@ for p in range(int(nb_list / 20) - 1):
         url_4[0] = url_4[0].replace("../","")
         list_Images.append(url_4)
         list_Name_Images.append(link_4.find_all('img')[0].get('alt'))
+
+path = os.getcwd()
+path = os.getcwd() + "/Images"
+os.mkdir(path)
+os.chdir(path)
+
 i = 0
-#Create the CSV file to store the images name and URL
 with open('images.csv', 'w', newline = '') as fichier_csv:
     writer = csv.writer(fichier_csv)
     while i < len(list_Images):
         writer.writerow(list_Images[i])
         i += 1
-
 i=0
-#use of the method urlretrieve to download the images in the folder
 while i < len(list_Images):
     for char in list_Chars_Forb:
         list_Name_Images[i] = list_Name_Images[i].replace(char, "")
